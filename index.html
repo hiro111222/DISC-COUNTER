@@ -4,14 +4,18 @@
 <meta charset="UTF-8">
 
 <meta name="viewport"
-      content="width=device-width,
-               initial-scale=1.0,
-               maximum-scale=1.0,
-               user-scalable=no">
+content="width=device-width,
+initial-scale=1.0,
+maximum-scale=1.0,
+user-scalable=no,
+viewport-fit=cover">
 
 <meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style"
-      content="black-translucent">
+content="black-translucent">
+
+<meta name="theme-color" content="#26951b">
 
 <title>Disc Counter</title>
 
@@ -20,8 +24,11 @@
 html, body {
     margin: 0;
     padding: 0;
+
     width: 100%;
     height: 100%;
+    min-height: 100dvh;
+
     overflow: hidden;
 
     background: #26951b;
@@ -35,33 +42,57 @@ html, body {
     font-family: Helvetica, Arial, sans-serif;
 }
 
+
+/* =========================
+   フィールド
+========================= */
+
 #field {
     position: fixed;
     inset: 0;
+
     background: #26951b;
 }
 
 
-/* ==============================
-   ボタン
-   ============================== */
+/* =========================
+   軌跡Canvas
+========================= */
+
+#trailCanvas {
+    position: absolute;
+
+    inset: 0;
+
+    width: 100%;
+    height: 100%;
+
+    pointer-events: none;
+
+    z-index: 5;
+}
+
+
+/* =========================
+   ボタン共通
+========================= */
 
 .control {
     position: fixed;
+
     z-index: 1000;
 
     border: none;
 
     color: white;
 
-    font-family: Helvetica, Arial, sans-serif;
-    font-size: 16px;
-
-    height: 30px;
+    height: 32px;
 
     border-radius: 5px;
 
-    padding: 0;
+    font-size: 15px;
+
+    font-weight: bold;
 
     -webkit-appearance: none;
 }
@@ -70,10 +101,9 @@ html, body {
 /* 9 */
 
 #btn9 {
+    top: calc(env(safe-area-inset-top) + 8px);
 
-    top: 10px;
-
-    left: 50px;
+    left: 20px;
 
     width: 50px;
 
@@ -84,10 +114,9 @@ html, body {
 /* 10 */
 
 #btn10 {
+    top: calc(env(safe-area-inset-top) + 8px);
 
-    top: 10px;
-
-    right: 50px;
+    left: 80px;
 
     width: 50px;
 
@@ -98,26 +127,34 @@ html, body {
 /* Clear */
 
 #clear {
+    top: calc(env(safe-area-inset-top) + 8px);
 
-    top: 40px;
+    right: 20px;
 
-    left: 50%;
-
-    width: 100px;
-
-    margin-left: -50px;
+    width: 70px;
 
     background: #d11e1e;
 }
 
 
+/* 軌跡Clear */
 
-/* ==============================
-   白丸
-   ============================== */
+#trailClear {
+    top: calc(env(safe-area-inset-top) + 48px);
+
+    right: 20px;
+
+    width: 90px;
+
+    background: #444;
+}
+
+
+/* =========================
+   ディスク
+========================= */
 
 .disc {
-
     position: absolute;
 
     width: 32px;
@@ -133,90 +170,65 @@ html, body {
 
     box-shadow:
         0 1px 2px
-        rgba(0,0,0,0.25);
+        rgba(0,0,0,.25);
 
     z-index: 10;
 
     animation:
-        discPop 0.4s ease;
+        discPop .4s ease;
 }
 
 
-/* Pythonista
-   1 → 1.5 → 1
-*/
+/* ディスクを置いた時の動き */
 
 @keyframes discPop {
 
     0% {
-
         transform:
             translate(-50%, -50%)
             scale(1);
-
     }
 
     50% {
-
         transform:
             translate(-50%, -50%)
             scale(1.5);
-
     }
 
     100% {
-
         transform:
             translate(-50%, -50%)
             scale(1);
-
     }
 }
 
 
-
-/* ==============================
-   使用済みの丸
-
-   Pythonista
-   fade_to(0.1, 0.5)
-   ============================== */
+/* =========================
+   使用済みディスク
+========================= */
 
 .disc.used {
-
-    opacity: 0.1;
+    opacity: .10;
 
     transition:
-        opacity 0.5s;
-
-    /*
-       薄くした丸を
-       再タップしない
-    */
+        opacity .5s;
 
     pointer-events: none;
 }
 
 
-
-/* ==============================
+/* =========================
    残り枚数
-   ============================== */
+========================= */
 
 #remaining {
-
     position: absolute;
 
     transform:
         translate(-50%, -50%);
 
     color:
-        rgba(255,255,255,0.5);
-
-    font-family:
-        Helvetica,
-        Arial,
-        sans-serif;
+        rgba(255,255,255,.5);
 
     font-size: 20px;
 
@@ -225,83 +237,141 @@ html, body {
     z-index: 50;
 }
 
+
+/* =========================
+   人 ★
+========================= */
+
+#person {
+    position: absolute;
+
+    left: 50%;
+    top: 75%;
+
+    width: 58px;
+    height: 58px;
+
+    transform:
+        translate(-50%, -50%);
+
+    display: flex;
+
+    align-items: center;
+    justify-content: center;
+
+    font-size: 52px;
+
+    color: #ffd900;
+
+    text-shadow:
+        0 2px 3px
+        rgba(0,0,0,.5);
+
+    z-index: 500;
+
+    cursor: grab;
+
+    touch-action: none;
+}
+
+
+/* ★をドラッグ中 */
+
+#person.dragging {
+    cursor: grabbing;
+
+    transform:
+        translate(-50%, -50%)
+        scale(1.15);
+}
+
 </style>
 </head>
-
 
 
 <body>
 
 
-<div id="field"></div>
+<div id="field">
+
+    <canvas id="trailCanvas"></canvas>
+
+    <div id="remaining"></div>
+
+    <div id="person">★</div>
+
+</div>
 
 
 <button
-    id="btn9"
-    class="control">
-    9
+id="btn9"
+class="control">
+9
 </button>
 
 
 <button
-    id="btn10"
-    class="control">
-    10
+id="btn10"
+class="control">
+10
 </button>
 
 
 <button
-    id="clear"
-    class="control">
-    Clear
+id="clear"
+class="control">
+Clear
+</button>
+
+
+<button
+id="trailClear"
+class="control">
+軌跡Clear
 </button>
 
 
 
 <script>
 
-
-/* ==============================
+/* =========================
    基本設定
-   ============================== */
+========================= */
 
 const field =
-    document.getElementById("field");
+document.getElementById("field");
 
 
 const remainingLabel =
-    document.createElement("div");
+document.getElementById("remaining");
 
 
-remainingLabel.id =
-    "remaining";
+const person =
+document.getElementById("person");
 
 
-field.appendChild(
-    remainingLabel
-);
+const canvas =
+document.getElementById("trailCanvas");
 
 
+const ctx =
+canvas.getContext("2d");
 
-/*
-  Pythonista版と同じ
-*/
+
 
 let selectedCount = 9;
 
 
 /*
-  現在有効な丸
+ 現在有効なディスク
 */
 
 let activeObjects = [];
 
 
 /*
-  画面上に存在する
-  全ての丸
-
-  薄くなった丸も含む
+ 使用済みも含む
+ 全ディスク
 */
 
 let allObjects = [];
@@ -312,16 +382,58 @@ let labelY = 0;
 
 
 
-/* ==============================
+/* =========================
+   Canvasサイズ設定
+========================= */
+
+function resizeCanvas() {
+
+    const ratio =
+        window.devicePixelRatio || 1;
+
+
+    canvas.width =
+        window.innerWidth * ratio;
+
+
+    canvas.height =
+        window.innerHeight * ratio;
+
+
+    canvas.style.width =
+        window.innerWidth + "px";
+
+
+    canvas.style.height =
+        window.innerHeight + "px";
+
+
+    ctx.setTransform(
+        ratio,
+        0,
+        0,
+        ratio,
+        0,
+        0
+    );
+
+}
+
+
+resizeCanvas();
+
+
+
+/* =========================
    音
-   ============================== */
+========================= */
 
 let audioContext = null;
 
 
 function clickSound(
     frequency = 700,
-    duration = 0.04
+    duration = .04
 ) {
 
     try {
@@ -354,13 +466,13 @@ function clickSound(
 
 
         gain.gain.setValueAtTime(
-            0.06,
+            .06,
             audioContext.currentTime
         );
 
 
         gain.gain.exponentialRampToValueAtTime(
-            0.001,
+            .001,
             audioContext.currentTime +
             duration
         );
@@ -382,8 +494,8 @@ function clickSound(
             duration
         );
 
-
-    } catch(e) {
+    }
+    catch(e) {
 
     }
 
@@ -391,15 +503,13 @@ function clickSound(
 
 
 
-/* ==============================
+/* =========================
    残り枚数表示
-   ============================== */
+========================= */
 
 function updateLabel() {
 
-
     const remaining =
-
         selectedCount -
         activeObjects.length;
 
@@ -412,31 +522,18 @@ function updateLabel() {
         labelX + "px";
 
 
-    /*
-      Pythonistaは
-      y + 30
-
-      Webでは上下が逆なので
-      -30
-    */
-
     remainingLabel.style.top =
         (labelY - 30) + "px";
-
-
-    remainingLabel.style.display =
-        "block";
 
 }
 
 
 
-/* ==============================
-   丸を置く
-   ============================== */
+/* =========================
+   ディスク追加
+========================= */
 
 function addObject(x, y) {
-
 
     const object =
         document.createElement("div");
@@ -459,19 +556,10 @@ function addObject(x, y) {
     );
 
 
-    /*
-      有効な丸として登録
-    */
-
     activeObjects.push(
         object
     );
 
-
-    /*
-      Clear用に
-      全丸リストにも登録
-    */
 
     allObjects.push(
         object
@@ -479,23 +567,17 @@ function addObject(x, y) {
 
 
 
-    /* ==========================
-       丸をタップ
-       ========================== */
+    /* -------------------------
+       ディスクをタップ
+    ------------------------- */
 
     object.addEventListener(
         "pointerdown",
 
         function(event) {
 
-
             event.stopPropagation();
 
-
-            /*
-              使用済みなら
-              何もしない
-            */
 
             if (
                 object.classList.contains(
@@ -508,16 +590,8 @@ function addObject(x, y) {
             }
 
 
-
             /*
-              Pythonista
-
-              fade_to(
-                  0.1,
-                  0.5
-              )
-
-              と同じ
+             使用済みにする
             */
 
             object.classList.add(
@@ -525,29 +599,16 @@ function addObject(x, y) {
             );
 
 
-
             /*
-              有効丸から削除
-
-              ただし画面からは
-              消さない
+             カウント対象から外す
             */
 
             activeObjects =
-
                 activeObjects.filter(
-
                     item =>
-                        item !== object
-
+                    item !== object
                 );
 
-
-
-            /*
-              ラベル位置を
-              この丸の位置へ
-            */
 
             labelX = x;
             labelY = y;
@@ -556,26 +617,15 @@ function addObject(x, y) {
             updateLabel();
 
 
-
-            /*
-              削除時の音
-            */
-
             clickSound(
                 450,
-                0.05
+                .05
             );
-
 
         }
 
     );
 
-
-
-    /*
-      最後に置いた位置
-    */
 
     labelX = x;
     labelY = y;
@@ -584,38 +634,42 @@ function addObject(x, y) {
     updateLabel();
 
 
-
-    /*
-      追加時の音
-    */
-
     clickSound(
         800,
-        0.04
+        .04
     );
 
 }
 
 
 
-/* ==============================
-   緑部分をタップ
-   ============================== */
+/* =========================
+   フィールドをタップ
+========================= */
 
 field.addEventListener(
     "pointerdown",
 
     function(event) {
 
+        /*
+         ★の場合は
+         ディスクを置かない
+        */
+
+        if (
+            event.target === person
+        ) {
+
+            return;
+
+        }
+
 
         addObject(
-
             event.clientX,
-
             event.clientY
-
         );
-
 
     }
 
@@ -623,18 +677,191 @@ field.addEventListener(
 
 
 
-/* ==============================
-   9ボタン
-   ============================== */
+/* =========================
+   ★ドラッグ
+========================= */
 
-document
-.getElementById("btn9")
-.addEventListener(
+let dragging = false;
 
+let previousX = 0;
+let previousY = 0;
+
+
+
+person.addEventListener(
     "pointerdown",
 
     function(event) {
 
+        event.stopPropagation();
+
+
+        dragging = true;
+
+
+        person.classList.add(
+            "dragging"
+        );
+
+
+        person.setPointerCapture(
+            event.pointerId
+        );
+
+
+        previousX =
+            event.clientX;
+
+
+        previousY =
+            event.clientY;
+
+    }
+
+);
+
+
+
+person.addEventListener(
+    "pointermove",
+
+    function(event) {
+
+        if (!dragging) {
+
+            return;
+
+        }
+
+
+        const x =
+            event.clientX;
+
+
+        const y =
+            event.clientY;
+
+
+
+        /* =====================
+           点線の軌跡
+        ===================== */
+
+        ctx.beginPath();
+
+
+        ctx.moveTo(
+            previousX,
+            previousY
+        );
+
+
+        ctx.lineTo(
+            x,
+            y
+        );
+
+
+        /*
+         白色・30%透明
+        */
+
+        ctx.strokeStyle =
+            "rgba(255,255,255,0.30)";
+
+
+        /*
+         細い線
+        */
+
+        ctx.lineWidth = 2;
+
+
+        /*
+         点線設定
+
+         5px線
+         5px空白
+        */
+
+        ctx.setLineDash(
+            [5,5]
+        );
+
+
+        ctx.lineCap =
+            "round";
+
+
+        ctx.lineJoin =
+            "round";
+
+
+        ctx.stroke();
+
+
+
+        /* =====================
+           ★を移動
+        ===================== */
+
+        person.style.left =
+            x + "px";
+
+
+        person.style.top =
+            y + "px";
+
+
+        previousX = x;
+        previousY = y;
+
+    }
+
+);
+
+
+
+/* =========================
+   ★ドラッグ終了
+========================= */
+
+function stopPersonDrag() {
+
+    dragging = false;
+
+
+    person.classList.remove(
+        "dragging"
+    );
+
+}
+
+
+
+person.addEventListener(
+    "pointerup",
+    stopPersonDrag
+);
+
+
+person.addEventListener(
+    "pointercancel",
+    stopPersonDrag
+);
+
+
+
+/* =========================
+   9
+========================= */
+
+document
+.getElementById("btn9")
+.addEventListener(
+    "pointerdown",
+
+    function(event) {
 
         event.stopPropagation();
 
@@ -644,25 +871,22 @@ document
 
         updateLabel();
 
-
     }
 
 );
 
 
 
-/* ==============================
-   10ボタン
-   ============================== */
+/* =========================
+   10
+========================= */
 
 document
 .getElementById("btn10")
 .addEventListener(
-
     "pointerdown",
 
     function(event) {
-
 
         event.stopPropagation();
 
@@ -672,6 +896,71 @@ document
 
         updateLabel();
 
+    }
+
+);
+
+
+
+/* =========================
+   全Clear
+========================= */
+
+document
+.getElementById("clear")
+.addEventListener(
+    "pointerdown",
+
+    function(event) {
+
+        event.stopPropagation();
+
+
+
+        /*
+         ディスクを全部削除
+        */
+
+        allObjects.forEach(
+
+            object =>
+                object.remove()
+
+        );
+
+
+        activeObjects = [];
+
+        allObjects = [];
+
+
+        selectedCount = 9;
+
+
+        labelX = 0;
+        labelY = 0;
+
+
+        remainingLabel.textContent =
+            "";
+
+
+        /*
+         軌跡も削除
+        */
+
+        ctx.clearRect(
+            0,
+            0,
+            canvas.width,
+            canvas.height
+        );
+
+
+        clickSound(
+            350,
+            .05
+        );
 
     }
 
@@ -679,82 +968,26 @@ document
 
 
 
-/* ==============================
-   Clear
-   ============================== */
+/* =========================
+   軌跡だけClear
+========================= */
 
 document
-.getElementById("clear")
+.getElementById("trailClear")
 .addEventListener(
-
     "pointerdown",
 
     function(event) {
 
-
         event.stopPropagation();
 
 
-
-        /*
-          薄くなった丸も含め
-          全部削除
-        */
-
-        allObjects.forEach(
-
-            object => {
-
-                object.remove();
-
-            }
-
+        ctx.clearRect(
+            0,
+            0,
+            canvas.width,
+            canvas.height
         );
-
-
-
-        /*
-          リストもリセット
-        */
-
-        activeObjects = [];
-
-        allObjects = [];
-
-
-
-        /*
-          Pythonista版と同じ
-          9へ戻す
-        */
-
-        selectedCount = 9;
-
-
-
-        /*
-          ラベル位置も
-          初期化
-        */
-
-        labelX = 0;
-        labelY = 0;
-
-
-
-        /*
-          Pythonista版に合わせ
-          Clear後のラベルを更新
-        */
-
-        updateLabel();
-
-
-        clickSound(
-            350,
-            0.05
-        );
-
 
     }
 
