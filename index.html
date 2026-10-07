@@ -56,7 +56,7 @@ html, body {
 
 
 /* =========================
-   軌跡Canvas
+   軌跡
 ========================= */
 
 #trailCanvas {
@@ -74,7 +74,7 @@ html, body {
 
 
 /* =========================
-   ボタン共通
+   ボタン
 ========================= */
 
 .control {
@@ -91,7 +91,6 @@ html, body {
     border-radius: 5px;
 
     font-size: 15px;
-
     font-weight: bold;
 
     -webkit-appearance: none;
@@ -124,7 +123,7 @@ html, body {
 }
 
 
-/* Clear */
+/* 全Clear */
 
 #clear {
     top: calc(env(safe-area-inset-top) + 8px);
@@ -179,8 +178,6 @@ html, body {
 }
 
 
-/* ディスクを置いた時の動き */
-
 @keyframes discPop {
 
     0% {
@@ -203,11 +200,10 @@ html, body {
 }
 
 
-/* =========================
-   使用済みディスク
-========================= */
+/* 使用済み */
 
 .disc.used {
+
     opacity: .10;
 
     transition:
@@ -218,54 +214,21 @@ html, body {
 
 
 /* =========================
-   残り枚数
-========================= */
-
-#remaining {
-    position: absolute;
-
-    transform:
-        translate(-50%, -50%);
-
-    color:
-        rgba(255,255,255,.5);
-
-    font-size: 20px;
-
-    pointer-events: none;
-
-    z-index: 50;
-}
-
-
-/* =========================
    人 ★
 ========================= */
 
 #person {
+
     position: absolute;
 
     left: 50%;
     top: 75%;
 
-    width: 58px;
-    height: 58px;
+    width: 64px;
+    height: 64px;
 
     transform:
         translate(-50%, -50%);
-
-    display: flex;
-
-    align-items: center;
-    justify-content: center;
-
-    font-size: 52px;
-
-    color: #ffd900;
-
-    text-shadow:
-        0 2px 3px
-        rgba(0,0,0,.5);
 
     z-index: 500;
 
@@ -275,14 +238,82 @@ html, body {
 }
 
 
-/* ★をドラッグ中 */
+/* 星 */
+
+#star {
+
+    position: absolute;
+
+    left: 50%;
+    top: 50%;
+
+    transform:
+        translate(-50%, -50%);
+
+    font-size: 52px;
+
+    line-height: 1;
+
+    color: #ffd900;
+
+    text-shadow:
+        0 2px 3px
+        rgba(0,0,0,.5);
+
+    pointer-events: none;
+}
+
+
+/* =========================
+   手持ち枚数
+========================= */
+
+#handCount {
+
+    position: absolute;
+
+    right: -4px;
+    top: -3px;
+
+    width: 28px;
+    height: 28px;
+
+    border-radius: 50%;
+
+    display: flex;
+
+    align-items: center;
+    justify-content: center;
+
+    background:
+        rgba(0,0,0,.72);
+
+    color: white;
+
+    border:
+        2px solid white;
+
+    font-size: 16px;
+
+    font-weight: bold;
+
+    line-height: 1;
+
+    pointer-events: none;
+
+    box-shadow:
+        0 1px 3px
+        rgba(0,0,0,.3);
+}
+
+
+/* ドラッグ中 */
 
 #person.dragging {
-    cursor: grabbing;
 
     transform:
         translate(-50%, -50%)
-        scale(1.15);
+        scale(1.12);
 }
 
 </style>
@@ -296,9 +327,15 @@ html, body {
 
     <canvas id="trailCanvas"></canvas>
 
-    <div id="remaining"></div>
+    <div id="person">
 
-    <div id="person">★</div>
+        <div id="star">★</div>
+
+        <div id="handCount">
+            9
+        </div>
+
+    </div>
 
 </div>
 
@@ -342,12 +379,12 @@ const field =
 document.getElementById("field");
 
 
-const remainingLabel =
-document.getElementById("remaining");
-
-
 const person =
 document.getElementById("person");
+
+
+const handCount =
+document.getElementById("handCount");
 
 
 const canvas =
@@ -358,32 +395,27 @@ const ctx =
 canvas.getContext("2d");
 
 
-
 let selectedCount = 9;
 
 
 /*
- 現在有効なディスク
+ 現在置かれている
+ 有効なディスク
 */
 
 let activeObjects = [];
 
 
 /*
- 使用済みも含む
- 全ディスク
+ 使用済みを含む全ディスク
 */
 
 let allObjects = [];
 
 
-let labelX = 0;
-let labelY = 0;
-
-
 
 /* =========================
-   Canvasサイズ設定
+   Canvas設定
 ========================= */
 
 function resizeCanvas() {
@@ -504,26 +536,18 @@ function clickSound(
 
 
 /* =========================
-   残り枚数表示
+   手持ち枚数更新
 ========================= */
 
-function updateLabel() {
+function updateHandCount() {
 
     const remaining =
         selectedCount -
         activeObjects.length;
 
 
-    remainingLabel.textContent =
+    handCount.textContent =
         remaining;
-
-
-    remainingLabel.style.left =
-        labelX + "px";
-
-
-    remainingLabel.style.top =
-        (labelY - 30) + "px";
 
 }
 
@@ -566,10 +590,9 @@ function addObject(x, y) {
     );
 
 
-
-    /* -------------------------
-       ディスクをタップ
-    ------------------------- */
+    /*
+     ディスクをタップ
+    */
 
     object.addEventListener(
         "pointerdown",
@@ -600,21 +623,19 @@ function addObject(x, y) {
 
 
             /*
-             カウント対象から外す
+             手持ちに戻す
             */
 
             activeObjects =
                 activeObjects.filter(
+
                     item =>
                     item !== object
+
                 );
 
 
-            labelX = x;
-            labelY = y;
-
-
-            updateLabel();
+            updateHandCount();
 
 
             clickSound(
@@ -627,11 +648,7 @@ function addObject(x, y) {
     );
 
 
-    labelX = x;
-    labelY = y;
-
-
-    updateLabel();
+    updateHandCount();
 
 
     clickSound(
@@ -644,7 +661,7 @@ function addObject(x, y) {
 
 
 /* =========================
-   フィールドをタップ
+   フィールドタップ
 ========================= */
 
 field.addEventListener(
@@ -652,13 +669,31 @@ field.addEventListener(
 
     function(event) {
 
+
         /*
-         ★の場合は
+         ★を触った場合は
          ディスクを置かない
         */
 
         if (
-            event.target === person
+            person.contains(
+                event.target
+            )
+        ) {
+
+            return;
+
+        }
+
+
+        /*
+         手持ち0なら
+         新しいディスクは置かない
+        */
+
+        if (
+            activeObjects.length >=
+            selectedCount
         ) {
 
             return;
@@ -727,6 +762,7 @@ person.addEventListener(
 
     function(event) {
 
+
         if (!dragging) {
 
             return;
@@ -744,7 +780,7 @@ person.addEventListener(
 
 
         /* =====================
-           点線の軌跡
+           点線軌跡
         ===================== */
 
         ctx.beginPath();
@@ -763,7 +799,7 @@ person.addEventListener(
 
 
         /*
-         白色・30%透明
+         薄い白
         */
 
         ctx.strokeStyle =
@@ -778,10 +814,7 @@ person.addEventListener(
 
 
         /*
-         点線設定
-
-         5px線
-         5px空白
+         点線
         */
 
         ctx.setLineDash(
@@ -802,7 +835,7 @@ person.addEventListener(
 
 
         /* =====================
-           ★を移動
+           ★移動
         ===================== */
 
         person.style.left =
@@ -814,6 +847,7 @@ person.addEventListener(
 
 
         previousX = x;
+
         previousY = y;
 
     }
@@ -823,7 +857,7 @@ person.addEventListener(
 
 
 /* =========================
-   ★ドラッグ終了
+   ドラッグ終了
 ========================= */
 
 function stopPersonDrag() {
@@ -836,7 +870,6 @@ function stopPersonDrag() {
     );
 
 }
-
 
 
 person.addEventListener(
@@ -853,7 +886,7 @@ person.addEventListener(
 
 
 /* =========================
-   9
+   9枚
 ========================= */
 
 document
@@ -869,7 +902,7 @@ document
         selectedCount = 9;
 
 
-        updateLabel();
+        updateHandCount();
 
     }
 
@@ -878,7 +911,7 @@ document
 
 
 /* =========================
-   10
+   10枚
 ========================= */
 
 document
@@ -894,7 +927,7 @@ document
         selectedCount = 10;
 
 
-        updateLabel();
+        updateHandCount();
 
     }
 
@@ -916,9 +949,8 @@ document
         event.stopPropagation();
 
 
-
         /*
-         ディスクを全部削除
+         全ディスク削除
         */
 
         allObjects.forEach(
@@ -934,19 +966,18 @@ document
         allObjects = [];
 
 
+        /*
+         9枚へ戻す
+        */
+
         selectedCount = 9;
 
 
-        labelX = 0;
-        labelY = 0;
-
-
-        remainingLabel.textContent =
-            "";
+        updateHandCount();
 
 
         /*
-         軌跡も削除
+         軌跡削除
         */
 
         ctx.clearRect(
@@ -994,8 +1025,15 @@ document
 );
 
 
-</script>
 
+/* =========================
+   初期表示
+========================= */
+
+updateHandCount();
+
+
+</script>
 
 </body>
 </html>
