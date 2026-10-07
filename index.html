@@ -2,226 +2,767 @@
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+
+<meta name="viewport"
+      content="width=device-width,
+               initial-scale=1.0,
+               maximum-scale=1.0,
+               user-scalable=no">
+
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style"
+      content="black-translucent">
+
 <title>Disc Counter</title>
 
 <style>
-  * {
-    box-sizing: border-box;
-    -webkit-user-select: none;
-    user-select: none;
-    -webkit-touch-callout: none;
-  }
 
-  html, body {
+html, body {
     margin: 0;
+    padding: 0;
     width: 100%;
     height: 100%;
     overflow: hidden;
-    font-family: -apple-system, BlinkMacSystemFont, sans-serif;
-  }
 
-  #field {
-    position: relative;
-    width: 100%;
-    height: 100%;
     background: #26951b;
+
     touch-action: none;
-  }
 
-  #controls {
-    position: absolute;
-    top: 12px;
-    left: 0;
-    width: 100%;
-    z-index: 100;
-    pointer-events: none;
-  }
+    user-select: none;
+    -webkit-user-select: none;
+    -webkit-touch-callout: none;
 
-  button {
-    position: absolute;
-    height: 38px;
+    font-family: Helvetica, Arial, sans-serif;
+}
+
+#field {
+    position: fixed;
+    inset: 0;
+    background: #26951b;
+}
+
+
+/* ==============================
+   ボタン
+   ============================== */
+
+.control {
+    position: fixed;
+    z-index: 1000;
+
     border: none;
-    border-radius: 7px;
+
     color: white;
-    font-size: 17px;
-    font-weight: bold;
-    pointer-events: auto;
-  }
 
-  #nine {
-    left: 40px;
-    width: 60px;
+    font-family: Helvetica, Arial, sans-serif;
+    font-size: 16px;
+
+    height: 30px;
+
+    border-radius: 5px;
+
+    padding: 0;
+
+    -webkit-appearance: none;
+}
+
+
+/* 9 */
+
+#btn9 {
+
+    top: 10px;
+
+    left: 50px;
+
+    width: 50px;
+
     background: #005a10;
-  }
+}
 
-  #ten {
-    right: 40px;
-    width: 60px;
+
+/* 10 */
+
+#btn10 {
+
+    top: 10px;
+
+    right: 50px;
+
+    width: 50px;
+
     background: #005a10;
-  }
+}
 
-  #clear {
-    top: 48px;
+
+/* Clear */
+
+#clear {
+
+    top: 40px;
+
     left: 50%;
-    transform: translateX(-50%);
-    width: 100px;
-    background: #d11e1e;
-  }
 
-  .disc {
+    width: 100px;
+
+    margin-left: -50px;
+
+    background: #d11e1e;
+}
+
+
+
+/* ==============================
+   白丸
+   ============================== */
+
+.disc {
+
     position: absolute;
+
     width: 32px;
     height: 32px;
+
     border-radius: 50%;
+
     background: white;
-    transform: translate(-50%, -50%);
-    box-shadow: 0 1px 4px rgba(0,0,0,.3);
-    animation: pop .4s ease;
+
+    transform:
+        translate(-50%, -50%)
+        scale(1);
+
+    box-shadow:
+        0 1px 2px
+        rgba(0,0,0,0.25);
+
     z-index: 10;
-  }
 
-  @keyframes pop {
-    0%   { transform: translate(-50%, -50%) scale(.3); }
-    50%  { transform: translate(-50%, -50%) scale(1.5); }
-    100% { transform: translate(-50%, -50%) scale(1); }
-  }
+    animation:
+        discPop 0.4s ease;
+}
 
-  .remaining {
-    position: absolute;
-    transform: translate(-50%, -50%);
-    color: rgba(255,255,255,.65);
-    font-size: 22px;
-    font-weight: bold;
+
+/* Pythonista
+   1 → 1.5 → 1
+*/
+
+@keyframes discPop {
+
+    0% {
+
+        transform:
+            translate(-50%, -50%)
+            scale(1);
+
+    }
+
+    50% {
+
+        transform:
+            translate(-50%, -50%)
+            scale(1.5);
+
+    }
+
+    100% {
+
+        transform:
+            translate(-50%, -50%)
+            scale(1);
+
+    }
+}
+
+
+
+/* ==============================
+   使用済みの丸
+
+   Pythonista
+   fade_to(0.1, 0.5)
+   ============================== */
+
+.disc.used {
+
+    opacity: 0.1;
+
+    transition:
+        opacity 0.5s;
+
+    /*
+       薄くした丸を
+       再タップしない
+    */
+
     pointer-events: none;
-    z-index: 20;
-  }
+}
+
+
+
+/* ==============================
+   残り枚数
+   ============================== */
+
+#remaining {
+
+    position: absolute;
+
+    transform:
+        translate(-50%, -50%);
+
+    color:
+        rgba(255,255,255,0.5);
+
+    font-family:
+        Helvetica,
+        Arial,
+        sans-serif;
+
+    font-size: 20px;
+
+    pointer-events: none;
+
+    z-index: 50;
+}
+
 </style>
 </head>
 
+
+
 <body>
 
-<div id="field">
 
-  <div id="controls">
-    <button id="nine">9</button>
-    <button id="ten">10</button>
-    <button id="clear">Clear</button>
-  </div>
+<div id="field"></div>
 
-</div>
+
+<button
+    id="btn9"
+    class="control">
+    9
+</button>
+
+
+<button
+    id="btn10"
+    class="control">
+    10
+</button>
+
+
+<button
+    id="clear"
+    class="control">
+    Clear
+</button>
+
+
 
 <script>
 
-const field = document.getElementById("field");
+
+/* ==============================
+   基本設定
+   ============================== */
+
+const field =
+    document.getElementById("field");
+
+
+const remainingLabel =
+    document.createElement("div");
+
+
+remainingLabel.id =
+    "remaining";
+
+
+field.appendChild(
+    remainingLabel
+);
+
+
+
+/*
+  Pythonista版と同じ
+*/
 
 let selectedCount = 9;
-let discs = [];
 
-let lastX = window.innerWidth / 2;
-let lastY = window.innerHeight / 2;
 
-function vibrate() {
-  if (navigator.vibrate) {
-    navigator.vibrate(20);
-  }
+/*
+  現在有効な丸
+*/
+
+let activeObjects = [];
+
+
+/*
+  画面上に存在する
+  全ての丸
+
+  薄くなった丸も含む
+*/
+
+let allObjects = [];
+
+
+let labelX = 0;
+let labelY = 0;
+
+
+
+/* ==============================
+   音
+   ============================== */
+
+let audioContext = null;
+
+
+function clickSound(
+    frequency = 700,
+    duration = 0.04
+) {
+
+    try {
+
+        if (!audioContext) {
+
+            audioContext =
+                new (
+                    window.AudioContext ||
+                    window.webkitAudioContext
+                )();
+
+        }
+
+
+        const oscillator =
+            audioContext.createOscillator();
+
+
+        const gain =
+            audioContext.createGain();
+
+
+        oscillator.type =
+            "sine";
+
+
+        oscillator.frequency.value =
+            frequency;
+
+
+        gain.gain.setValueAtTime(
+            0.06,
+            audioContext.currentTime
+        );
+
+
+        gain.gain.exponentialRampToValueAtTime(
+            0.001,
+            audioContext.currentTime +
+            duration
+        );
+
+
+        oscillator.connect(gain);
+
+
+        gain.connect(
+            audioContext.destination
+        );
+
+
+        oscillator.start();
+
+
+        oscillator.stop(
+            audioContext.currentTime +
+            duration
+        );
+
+
+    } catch(e) {
+
+    }
+
 }
 
-function updateLabel(x = lastX, y = lastY) {
 
-  document.querySelectorAll(".remaining").forEach(el => el.remove());
 
-  const remaining = selectedCount - discs.length;
+/* ==============================
+   残り枚数表示
+   ============================== */
 
-  const label = document.createElement("div");
-  label.className = "remaining";
-  label.textContent = remaining;
+function updateLabel() {
 
-  label.style.left = x + "px";
-  label.style.top = (y - 35) + "px";
 
-  field.appendChild(label);
+    const remaining =
 
-  lastX = x;
-  lastY = y;
+        selectedCount -
+        activeObjects.length;
+
+
+    remainingLabel.textContent =
+        remaining;
+
+
+    remainingLabel.style.left =
+        labelX + "px";
+
+
+    /*
+      Pythonistaは
+      y + 30
+
+      Webでは上下が逆なので
+      -30
+    */
+
+    remainingLabel.style.top =
+        (labelY - 30) + "px";
+
+
+    remainingLabel.style.display =
+        "block";
+
 }
 
-function addDisc(x, y) {
 
-  const disc = document.createElement("div");
-  disc.className = "disc";
 
-  disc.style.left = x + "px";
-  disc.style.top = y + "px";
+/* ==============================
+   丸を置く
+   ============================== */
 
-  disc.addEventListener("pointerdown", function(e) {
+function addObject(x, y) {
 
-    e.stopPropagation();
 
-    disc.style.transition = "opacity .3s, transform .3s";
-    disc.style.opacity = "0";
-    disc.style.transform =
-      "translate(-50%, -50%) scale(.2)";
+    const object =
+        document.createElement("div");
 
-    discs = discs.filter(d => d !== disc);
 
-    updateLabel(x, y);
-    vibrate();
+    object.className =
+        "disc";
 
-    setTimeout(() => disc.remove(), 300);
 
-  });
+    object.style.left =
+        x + "px";
 
-  field.appendChild(disc);
-  discs.push(disc);
 
-  updateLabel(x, y);
-  vibrate();
+    object.style.top =
+        y + "px";
+
+
+    field.appendChild(
+        object
+    );
+
+
+    /*
+      有効な丸として登録
+    */
+
+    activeObjects.push(
+        object
+    );
+
+
+    /*
+      Clear用に
+      全丸リストにも登録
+    */
+
+    allObjects.push(
+        object
+    );
+
+
+
+    /* ==========================
+       丸をタップ
+       ========================== */
+
+    object.addEventListener(
+        "pointerdown",
+
+        function(event) {
+
+
+            event.stopPropagation();
+
+
+            /*
+              使用済みなら
+              何もしない
+            */
+
+            if (
+                object.classList.contains(
+                    "used"
+                )
+            ) {
+
+                return;
+
+            }
+
+
+
+            /*
+              Pythonista
+
+              fade_to(
+                  0.1,
+                  0.5
+              )
+
+              と同じ
+            */
+
+            object.classList.add(
+                "used"
+            );
+
+
+
+            /*
+              有効丸から削除
+
+              ただし画面からは
+              消さない
+            */
+
+            activeObjects =
+
+                activeObjects.filter(
+
+                    item =>
+                        item !== object
+
+                );
+
+
+
+            /*
+              ラベル位置を
+              この丸の位置へ
+            */
+
+            labelX = x;
+            labelY = y;
+
+
+            updateLabel();
+
+
+
+            /*
+              削除時の音
+            */
+
+            clickSound(
+                450,
+                0.05
+            );
+
+
+        }
+
+    );
+
+
+
+    /*
+      最後に置いた位置
+    */
+
+    labelX = x;
+    labelY = y;
+
+
+    updateLabel();
+
+
+
+    /*
+      追加時の音
+    */
+
+    clickSound(
+        800,
+        0.04
+    );
+
 }
 
-field.addEventListener("pointerdown", function(e) {
 
-  if (e.target.tagName === "BUTTON") return;
 
-  addDisc(e.clientX, e.clientY);
+/* ==============================
+   緑部分をタップ
+   ============================== */
 
-});
+field.addEventListener(
+    "pointerdown",
 
-document.getElementById("nine").onclick = function(e) {
+    function(event) {
 
-  e.stopPropagation();
 
-  selectedCount = 9;
-  updateLabel();
+        addObject(
 
-};
+            event.clientX,
 
-document.getElementById("ten").onclick = function(e) {
+            event.clientY
 
-  e.stopPropagation();
+        );
 
-  selectedCount = 10;
-  updateLabel();
 
-};
+    }
 
-document.getElementById("clear").onclick = function(e) {
+);
 
-  e.stopPropagation();
 
-  discs.forEach(d => d.remove());
-  discs = [];
 
-  selectedCount = 9;
+/* ==============================
+   9ボタン
+   ============================== */
 
-  document.querySelectorAll(".remaining")
-    .forEach(el => el.remove());
+document
+.getElementById("btn9")
+.addEventListener(
 
-  vibrate();
+    "pointerdown",
 
-};
+    function(event) {
+
+
+        event.stopPropagation();
+
+
+        selectedCount = 9;
+
+
+        updateLabel();
+
+
+    }
+
+);
+
+
+
+/* ==============================
+   10ボタン
+   ============================== */
+
+document
+.getElementById("btn10")
+.addEventListener(
+
+    "pointerdown",
+
+    function(event) {
+
+
+        event.stopPropagation();
+
+
+        selectedCount = 10;
+
+
+        updateLabel();
+
+
+    }
+
+);
+
+
+
+/* ==============================
+   Clear
+   ============================== */
+
+document
+.getElementById("clear")
+.addEventListener(
+
+    "pointerdown",
+
+    function(event) {
+
+
+        event.stopPropagation();
+
+
+
+        /*
+          薄くなった丸も含め
+          全部削除
+        */
+
+        allObjects.forEach(
+
+            object => {
+
+                object.remove();
+
+            }
+
+        );
+
+
+
+        /*
+          リストもリセット
+        */
+
+        activeObjects = [];
+
+        allObjects = [];
+
+
+
+        /*
+          Pythonista版と同じ
+          9へ戻す
+        */
+
+        selectedCount = 9;
+
+
+
+        /*
+          ラベル位置も
+          初期化
+        */
+
+        labelX = 0;
+        labelY = 0;
+
+
+
+        /*
+          Pythonista版に合わせ
+          Clear後のラベルを更新
+        */
+
+        updateLabel();
+
+
+        clickSound(
+            350,
+            0.05
+        );
+
+
+    }
+
+);
+
 
 </script>
+
 
 </body>
 </html>
